@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<!--
+	CivClicker
+	Copyright (C) 2014 David Holley
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program (if you are reading this on the original
+	author's website, you can find a copy at <http://dhmholley.co.uk/gpl.txt>). 
+	If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+	<title>CivClicker中文版 (v1.1.11alpha)</title>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<link rel="stylesheet" type="text/css" href="civclicker.css" />
+	<link rel="canonical" href="http://civclicker.sourceforge.net/civclicker/civclicker.html" />
+	<meta name="description" content="CivClicker: 點擊鼠標來建立文明" />
+
+	<script src="lz-string.js" type="text/javascript"></script>
+	<script src="jsutils.js" type="text/javascript"></script>
+</head>
+<body class="hasBackground">
+
+<div id="strip">
+	<div id="stripInner">
+		<a href="civFAQ.html" target="_blank">常見問題 / 說明 / 修正與除錯</a> - 
+		<a href="civUpdates.html" target="_blank">遊戲更新紀錄</a> - 
+		<a href="#" onclick="impExp()">導入/導出存檔</a>
+		<span id="versionAlert"> - <span id="newVersionText" onclick="location.reload()">升級到新版本</span></span>
+	</div>
+</div>
+
+<div id="impexp">
+	<textarea id="impexpField"></textarea>
+	<button id="expButton" onclick="save('export')">導出</button>
+	<button id="expSelect" onclick="document.getElementById('impexpField').select();">選擇全部</button>
+	<button id="impexpClose" onclick="impExp()">關閉</button>
+	<button id="impButton" onclick="load('import')">導入</button>
+</div>
+
+<div id="header">
+	<h1><span id="civName">伍德斯托克</span><span id="civType">村莊</span></h1>
+	<div id="ruler"><span id="appellation">由強有力的</span><span id="rulerName">腳趾王</span>所統治</div>
+	<div style="clear:both;"></div>
+</div>
+
+<div id="resources">
+	<div id="resourcesContainer">
+		<div id="basicResourcesContainer">
+			<h3>基本資源</h3>
+			<table id="basicResources">
+				<tr>
+					<td><button onmousedown="increment(food)">採集食物</button></td>
+					<td>食物: </td>
+					<td class="number"><span data-action="display" data-target="food">0</span></td>
+					<td class="icon"><img src="images/food.png" class="icon icon-lg" alt="Food"/></td>
+					<td class="number">(最多儲存: <span id="maxfood">200</span>)</td>
+					<td class="number net"><span data-action="displayNet" data-target="food">0</span>/秒</td>
+				</tr>
+				<tr>
+					<td><button onmousedown="increment(wood)">伐木</button></td>
+					<td>木材: </td>
+					<td class="number"><span data-action="display" data-target="wood">0</span></td>
+					<td class="icon"><img src="images/wood.png" class="icon icon-lg" alt="Wood"/></td>
+					<td class="number">(最多儲存: <span id="maxwood">200</span>)</td>
+					<td class="number net"><span data-action="displayNet" data-target="wood">0</span>/秒</td>
+				</tr>
+				<tr>
+					<td><button onmousedown="increment(stone)">採石</button></td>
+					<td>石材: </td>
+					<td class="number"><span data-action="display" data-target="stone">0</span></td>
+					<td class="icon"><img src="images/stone.png" class="icon icon-lg" alt="Stone"/></td>
+					<td class="number">(最多儲存: <span id="maxstone">200</span>)</td>
+					<td class="number net"><span data-action="displayNet" data-target="stone">0</span>/秒</td>
+				</tr>
+			</table>
+		</div>
+		<div id="specialResourcesContainer">
+			<h3>特殊資源</h3>
+			<table>
+				<tr>
+					<td>獸皮: </td>
+					<td class="number"><span data-action="display" data-target="skins">0</span></td>
+					<td><img src="images/skins.png" class="icon icon-lg" alt="Skins"/></td>
+					<td>皮革: </td>
+					<td class="number"><span data-action="display" data-target="leather">0</span></td>
+					<td class="icon"><img src="images/leather.png" class="icon icon-lg" alt="Leather"/></td>
+				</tr>
+				<tr>
+					<td>藥草: </td>
+					<td class="number"><span data-action="display" data-target="herbs">0</span></td>
+					<td><img src="images/herbs.png" class="icon icon-lg" alt="Herbs"/></td>
+					<td>虔誠: </td>
+					<td class="number"><span data-action="display" data-target="piety">0</span></td>
+					<td class="icon"><img src="images/piety.png" class="icon icon-lg" alt="Piety"/></td>
+				</tr>
+				<tr>
+					<td>礦石: </td>
+					<td class="number"><span data-action="display" data-target="ore">0</span></td>
+					<td><img src="images/ore.png" class="icon icon-lg" alt="Ore"/></td>
+					<td>金屬: </td>
+					<td class="number"><span data-action="display" data-target="metal">0</span></td>
+					<td class="icon"><img src="images/metal.png" class="icon icon-lg" alt="Metal"/></td>
+				</tr>
+				<tr id="goldRow">
+					<td>黃金: </td>
+					<td class="number"><span data-action="display" data-target="gold">0</span></td>
+					<td class="icon"><img src="images/gold.png" class="icon icon-lg" alt="Gold"/></td>
+					<td colspan="3"></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div id="panesSelectors">
+		<div id="selectors">
+			<div id="selectBuildings" class="paneSelector selected" onclick="paneSelect('buildings')">建築</div>
+			<div id="selectUpgrades" class="paneSelector" onclick="paneSelect('upgrades')">附加功能</div>
+			<div id="selectDeity" class="paneSelector" onclick="paneSelect('deity')">神明</div>
+			<div id="selectConquest" class="paneSelector" onclick="paneSelect('conquest')">征戰</div>
+			<div id="selectTrade" class="paneSelector" onclick="paneSelect('trade')">貿易</div>
+			<div style="clear:both;"></div>
+		</div>
+		
+		<div id="buildingsPane">
+		<h3>建築</h3>
+			<p id="customBuildIncrement">
+				增加: <input id="buildCustom" type="number" min="1" step="1" value="1" />
+			</p>
+			<table id="buildings">
+				<tr id="tentRow">
+					<td><button onmousedown="createBuilding(tent,1)">搭帳幕</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(tent,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(tent,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(tent,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(tent)">+自定義</button></td>
+					<td class="buildingnames">帳幕: </td>
+					<td class="number"><span data-action="display" data-target="tent">0</span></td>
+					<td><span class="cost">2個獸皮, 2個木材</span><span class="note">: +1最多人口</span></td>
+				</tr>
+				<tr id="whutRow">
+					<td><button onmousedown="createBuilding(whut,1)">搭小木屋</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(whut,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(whut,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(whut,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(whut)">+自定義</button></td>
+					<td class="buildingnames">小木屋: </td>
+					<td class="number"><span data-action="display" data-target="whut">0</span></td>
+					<td><span class="cost">1個獸皮, 20個木材</span><span class="note">: +3最多人口</span></td>
+				</tr>
+				<tr id="cottageRow">
+					<td><button onmousedown="createBuilding(cottage,1)">建立茅舍</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(cottage,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(cottage,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(cottage,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(cottage)">+自定義</button></td>
+					<td class="buildingnames">茅舍: </td>
+					<td class="number"><span data-action="display" data-target="cottage">0</span></td>
+					<td><span class="cost">10個木材, 30個石材</span><span class="note">: +6最多人口</span></td>
+				</tr>
+				<tr id="houseRow">
+					<td><button onmousedown="createBuilding(house,1)">建立房子</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(house,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(house,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(house,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(house)">+自定義</button></td>
+					<td class="buildingnames">房子: </td>
+					<td class="number"><span data-action="display" data-target="house">0</span></td>
+					<td><span class="cost">30個木材, 70個石材</span><span class="note">: +10最多人口</span></td>
+				</tr>
+				<tr id="mansionRow">
+					<td><button onmousedown="createBuilding(mansion,1)">建立豪宅</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(mansion,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(mansion,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(mansion,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(mansion)">+自定義</button></td>
+					<td class="buildingnames">豪宅: </td>
+					<td class="number"><span data-action="display" data-target="mansion">0</span></td>
+					<td><span class="cost">200個木材, 200個石材, 20個皮革</span><span class="note">: +50最多人口.</span></td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+				</tr>
+				<tr id="barnRow">
+					<td><button onmousedown="createBuilding(barn,1)">建立糧倉</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(barn,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(barn,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(barn,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(barn)">+自定義</button></td>
+					<td class="buildingnames">糧倉: </td>
+					<td class="number"><span data-action="display" data-target="barn">0</span></td>
+					<td><span class="cost">100個木材</span><span class="note">: 儲存 +200 食物</span></td>
+				</tr>
+				<tr id="woodstockRow">
+					<td><button onmousedown="createBuilding(woodstock,1)">建立木材庫存</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(woodstock,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(woodstock,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(woodstock,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(woodstock)">+自定義</button></td>
+					<td class="buildingnames">木材庫存: </td>
+					<td class="number"><span data-action="display" data-target="woodstock">0</span></td>
+					<td><span class="cost">100個木材</span><span class="note">: 儲存 +200 木材</span></td>
+				</tr>
+				<tr id="stonestockRow">
+					<td><button onmousedown="createBuilding(stonestock,1)">建立石材庫存</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(stonestock,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(stonestock,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(stonestock,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(stonestock)">+自定義</button></td>
+					<td class="buildingnames">石材庫存: </td>
+					<td class="number"><span data-action="display" data-target="stonestock">0</span></td>
+					<td><span class="cost">100個木材</span><span class="note">: 儲存 +200 石材</span></td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+				</tr>
+				<tr id="tanneryRow">
+					<td><button onmousedown="createBuilding(tannery,1)">建立製革廠</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(tannery,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(tannery,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(tannery,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(tannery)">+自定義</button></td>
+					<td class="buildingnames">製革廠: </td>
+					<td class="number"><span data-action="display" data-target="tannery">0</span></td>
+					<td><span class="cost">30個木材, 70個石材, 2個獸皮</span><span class="note">: 允許1個皮匠</span></td>
+				</tr>
+				<tr id="smithyRow">
+					<td><button onmousedown="createBuilding(smithy,1)">建立鐵匠舖</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(smithy,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(smithy,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(smithy,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(smithy)">+自定義</button></td>
+					<td class="buildingnames">鐵匠舖: </td>
+					<td class="number"><span data-action="display" data-target="smithy">0</span></td>
+					<td><span class="cost">30個木材, 70個石材, 2個礦石</span><span class="note">: 允許1個鐵匠</span></td>
+				</tr>
+				<tr id="apothecaryRow">
+					<td><button onmousedown="createBuilding(apothecary,1)">建立藥房</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(apothecary,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(apothecary,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(apothecary,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(apothecary)">+自定義</button></td>
+					<td class="buildingnames">藥房: </td>
+					<td class="number"><span data-action="display" data-target="apothecary">0</span></td>
+					<td><span class="cost">30個木材, 70個石材, 2個藥草</span><span class="note">: 允許1個藥劑師</span></td>
+				</tr>
+				<tr id="templeRow">
+					<td><button onmousedown="createBuilding(temple,1)">建立神殿</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(temple,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(temple,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(temple,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(temple)">+自定義</button></td>
+					<td class="buildingnames">神殿: </td>
+					<td class="number"><span data-action="display" data-target="temple">0</span></td>
+					<td><span class="cost">30個木材, 120個石材, 10個藥草</span><span class="note">: 允許1個神職人員</span></td>
+				</tr>
+				<tr id="barracksRow">
+					<td><button onmousedown="createBuilding(barracks,1)">建立兵營</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(barracks,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(barracks,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(barracks,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(barracks)">+自定義</button></td>
+					<td class="buildingnames">兵營: </td>
+					<td class="number"><span data-action="display" data-target="barracks">0</span></td>
+					<td><span class="cost">20個食物, 60個木材, 120個石材, 10個金屬</span><span class="note">: 允許10個士兵</span></td>
+				</tr>
+				<tr id="stableRow">
+					<td><button onmousedown="createBuilding(stable,1)">建立馬廄</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(stable,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(stable,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(stable,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(stable)">+自定義</button></td>
+					<td class="buildingnames">馬廄: </td>
+					<td class="number"><span data-action="display" data-target="stable">0</span></td>
+					<td><span class="cost">60個食物, 60個木材, 120個石材, 10個皮革</span><span class="note">: 允許10個騎兵</span></td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+				</tr>
+				<tr id="graveyardRow">
+					<td><button onmousedown="createBuilding(graveyard,1)">建立墓地</button></td>
+					<td class="buildingten"><button class="x10" onmousedown="createBuilding(graveyard,10)">x10</button></td>
+					<td class="buildinghundred"><button class="x100" onmousedown="createBuilding(graveyard,100)">x100</button></td>
+					<td class="buildingthousand"><button class="x1000" onmousedown="createBuilding(graveyard,1000)">x1千</button></td>
+					<td class="buildCustom"><button onmousedown="buildCustom(graveyard)">+自定義</button></td>
+					<td class="buildingnames">墓地: </td>
+					<td class="number"><span data-action="display" data-target="graveyard">0</span></td>
+					<td><span class="cost">100個木材; 200個石材, 50個藥草</span><span class="note">: 供100個墳墓</span></td>
+				</tr>
+				<tr id="millRow">
+					<td><button onmousedown="createBuilding(mill,1)">建立磨坊</button></td>
+					<td class="buildingten"></td>
+					<td class="buildinghundred"></td>
+					<td class="buildingthousand"></td>
+					<td class="buildCustom"></td>
+					<td class="buildingnames">磨坊: </td>
+					<td class="number"><span data-action="display" data-target="mill">0</span></td>
+					<td><span class="cost"><span id="millCostW">100</span>個木材, <span id="millCostS">100</span>個石材</span><span class="note">: 增加農夫效率</span></td>
+				</tr>
+				<tr id="fortificationRow">
+					<td><button onmousedown="createBuilding(fortification,1)">建立防禦工事</button></td>
+					<td class="buildingten"></td>
+					<td class="buildinghundred"></td>
+					<td class="buildingthousand"></td>
+					<td class="buildCustom"></td>
+					<td class="buildingnames">防禦工事: </td>
+					<td class="number"><span data-action="display" data-target="fortification">0</span></td>
+					<td><span class="cost"><span id="fortCost">100</span>個石材</span><span class="note">: 保衛文明以免受敵人的攻擊</span></td>
+				</tr>
+			</table>
+		</div>
+		
+		<div id="upgradesPane">
+		<h3>附加功能</h3>
+			<span id="skinningLine"><button id="skinning" onmousedown="upgrade('skinning')">剝皮<br />(10個獸皮)</button><span class="note">農夫可採集獸皮</span><br /></span>
+			<span id="harvestingLine"><button id="harvesting" onmousedown="upgrade('harvesting')">收割<br />(10藥草)</button><span class="note">伐木工可採集藥草</span><br /></span>
+			<span id="prospectingLine"><button id="prospecting" onmousedown="upgrade('prospecting')">勘探<br />(10 ore)</button><span class="note">礦工可採集礦石</span><br /><br /></span>
+			<div id="basicFarming">
+				<span id="domesticationLine"><button id="domestication" onmousedown="upgrade('domestication')">馴養<br />(20個皮革)</button><span class="note">增加農夫產量</span><br /></span>
+				<span id="ploughsharesLine"><button id="ploughshares" onmousedown="upgrade('ploughshares')">犁頭<br />(20個金屬)</button><span class="note">增加農夫產量</span><br /></span>
+				<span id="irrigationLine"><button id="irrigation" onmousedown="upgrade('irrigation')">灌溉<br />(500個木材, 200個石材)</button><span class="note">增加農夫產量</span><br /><br /></span>
+			</div>
+			<div id="specialFarming">
+				<span id="butcheringLine"><button id="butchering" onmousedown="upgrade('butchering')" disabled>屠宰<br />(剝皮, 40個皮革)</button><span class="note">更多農夫採集更多獸皮</span><br /></span>
+				<span id="gardeningLine"><button id="gardening" onmousedown="upgrade('gardening')" disabled>園藝<br />(收割, 40個藥草)</button><span class="note">更多伐木工採集更多藥草</span><br /></span>
+				<span id="extractionLine"><button id="extraction" onmousedown="upgrade('extraction')" disabled>開採<br />(勘探, 40個金屬)</button><span class="note">更多礦工採集更多礦石</span><br /><br /></span>
+			</div>
+			<div id="specFreq">
+				<span id="flensingLine"><button id="flensing" onmousedown="upgrade('flensing')">剝取脂肪<br />(1000個金屬)</button><span class="note">採集更多獸皮</span><br /></span>
+				<span id="maceratingLine"><button id="macerating" onmousedown="upgrade('macerating')">浸軟<br />(500個皮革, 500個石材)</button><span class="note">採集更多礦石</span><br /><br /></span>
+			</div>
+			<div id="improvedFarming">
+				<span id="cropRotationLine"><button id="croprotation" onmousedown="upgrade('croprotation')">輪作<br />(5000個藥草, 1000個虔誠)</button><span class="note">增加農夫產量</span><br /></span>
+				<span id="selectiveBreedingLine"><button id="selectivebreeding" onmousedown="upgrade('selectivebreeding')">選擇育種<br />(5000個獸皮, 1000個虔誠)</button><span class="note">增加農夫產量</span><br /></span>
+				<span id="fertilisersLine"><button id="fertilisers" onmousedown="upgrade('fertilisers')">肥料<br />(5000個礦石, 1000個虔誠)</button><span class="note">增加農夫產量</span><br /><br /></span>
+			</div>
+			<span id="masonryLine"><button id="masonry" onmousedown="upgrade('masonry')">石工術<br />(100個木材, 100個石材)</button><span class="note">開啓更多建築和附加功能</span><br /></span>
+			<span id="constructionLine"><button id="construction" onmousedown="upgrade('construction')">建築業<br />(1000個木材, 1000個石材)</button><span class="note">開啓更多建築和附加功能</span><br /></span>
+			<span id="architectureLine"><button id="architecture" onmousedown="upgrade('architecture')">建築術<br />(10000個木材, 10000個石材)</button><span class="note">開啓更多建築和附加功能</span><br /><br /></span>
+			<span id="tenementsLine"><button id="tenements" onmousedown="upgrade('tenements')">租屋<br />(200個食物, 500個木材, 500個石材)</button><span class="note">房屋可供 +2 工人居住</span><br /></span>
+			<span id="slumsLine"><button id="slums" onmousedown="upgrade('slums')">貧民窟<br />(500個食物, 1000個木材, 1000個石材)</button><span class="note">房屋可供 +2 工人居住</span><br /></span>
+			<span id="granariesLine"><button id="granaries" onmousedown="upgrade('granaries')">穀倉<br />(1000個木材, 1000個石材)</button><span class="note">糧倉可儲存2倍的食物</span><br /></span>
+			<span id="palisadeLine"><button id="palisade" onmousedown="upgrade('palisade')">木柵<br />(2000個木材, 1000個石材)</button><span class="note">減少敵人的損壞</span><br /><br /></span>
+			<div id="masonryTech">
+				<span id="weaponryLine"><button id="weaponry" onmousedown="upgrade('weaponry')">基本武器<br />(500個木材, 500個金屬)</button><span class="note">增加士兵效率</span><br /></span>
+				<span id="shieldsLine"><button id="shields" onmousedown="upgrade('shields')">基本盾牌<br />(500個木材, 500個皮革)</button><span class="note">增加士兵效率</span><br /><br /></span>
+				<span id="horsebackLine"><button id="horseback" onmousedown="upgrade('horseback')">馬術<br />(500個食物, 500個木材)</button><span class="note">建立馬廄</span><br /></span>
+				<span id="wheelLine"><button id="wheel" onmousedown="upgrade('wheel')">車輪<br />(500個木材, 500個石材)</button><span class="note">建立磨坊</span><br /><br /></span>
+				<span id="writingLine"><button id="writing" onmousedown="upgrade('writing')">文學<br />(500個獸皮)</button><span class="note">增加神職人員虔誠產量</span><br /></span>
+				<div id="writingTech">
+					<span id="administrationLine"><button id="administration" onmousedown="upgrade('administration')">行政<br />(1000個石材, 1000個獸皮)</button><span class="note">增加劫掠時征來的土地</span><br /></span>
+					<span id="codeoflawsLine"><button id="codeoflaws" onmousedown="upgrade('codeoflaws')">法典<br />(1000個石材, 1000個獸皮)</button><span class="note">減少人口擁擠所導致的不滿</span><br /></span>
+					<span id="mathematicsLine"><button id="mathematics" onmousedown="upgrade('mathematics')">數學<br />(1000個藥草, 1000個虔誠)</button><span class="note">建立攻城塔</span><br /></span>
+					<span id="aestheticsLine"><button id="aesthetics" onmousedown="upgrade('aesthetics')">美學<br />(5000個虔誠)</button><span class="note">建立神殿可增加滿意度</span><br /><br /></span>
+				</div>
+				<span id="civilserviceLine"><button id="civilservice" onmousedown="upgrade('civilservice')">文官<br />(5000個虔誠)</button><span class="note">增加點擊可獲的基本資源</span><br /></span>
+				<div id="civilTech">
+					<span id="feudalismLine"><button id="feudalism" onmousedown="upgrade('feudalism')">封建制度<br />(10&#8239;000個虔誠)</button><span class="note">點擊可獲得更多資源</span><br /></span>
+					<span id="guildsLine"><button id="guilds" onmousedown="upgrade('guilds')">行會<br />(10&#8239;000個虔誠)</button><span class="note">增加點擊可獲得的特殊資源</span><br /></span>
+					<span id="serfsLine"><button id="serfs" onmousedown="upgrade('serfs')">農奴<br />(20&#8239;000個虔誠)</button><span class="note">無業工人可增加點擊時所獲得的資源</span><br /></span>
+					<span id="nationalismLine"><button id="nationalism" onmousedown="upgrade('nationalism')">民族主義<br />(50&#8239;000個虔誠)</button><span class="note">士兵增加點擊所獲得的基本資源</span><br /></span>
+				</div>
+				<span id="wonderLine"><br /><button id="startWonder" onmousedown="startWonder()">開始建立奇觀</button><br /></span>
+			</div>
+			<h3>已獲附加功能</h3>
+			<div id="purchased">
+				<span id="Pskinning"><b>剝皮</b> - 農夫可採集獸皮</span>
+				<span id="Pharvesting"><b>收割</b> - 伐木工可採集藥草</span>
+				<span id="Pprospecting"><b>勘探</b> - 礦工可採集礦石</span>
+				<span id="Pdomestication"><b>馴養</b> - 增加農夫產量</span>
+				<span id="Pploughshares"><b>犁頭</b> - 增加農夫產量</span>
+				<span id="Pirrigation"><b>灌溉</b> - 增加農夫產量</span>
+				<span id="Pbutchering"><b>屠宰</b> - 更多農夫採集更多獸皮</span>
+				<span id="Pgardening"><b>園藝</b> - 更多伐木工採集更多藥草</span>
+				<span id="Pextraction"><b>開採</b> - 更多礦工採集更多礦石</span>
+				<span id="Pflensing"><b>剝取脂肪</b> - 採集更多獸皮</span>
+				<span id="Pmacerating"><b>浸軟</b> - 採集更多礦石</span>
+				<span id="Pcroprotation"><b>輪作</b> - 增加農夫產量</span>
+				<span id="Pselectivebreeding"><b>選擇育種</b> - 增加農夫產量</span>
+				<span id="Pfertilisers"><b>肥料</b> - 增加農夫產量</span>
+				<span id="Pmasonry"><b>石工術</b> - 開啓更多建築和附加功能</span>
+				<span id="Pconstruction"><b>建築業</b> - 開啓更多建築和附加功能</span>
+				<span id="Parchitecture"><b>建築術</b> - 開啓更多建築和附加功能</span>
+				<span id="Ptenements"><b>租屋</b> - 房屋可供 +2 工人居住</span>
+				<span id="Pslums"><b>貧民窟</b> - 房屋可供 +2 工人居住</span>
+				<span id="Pgranaries"><b>穀倉</b> - 糧倉可儲存2倍的食物</span>
+				<span id="Ppalisade"><b>木柵</b> - 減少敵人的損壞</span>
+				<span id="Pweaponry"><b>基本武器</b> - 增加士兵效率</span>
+				<span id="Pshields"><b>基本盾牌</b> - 增加士兵效率</span>
+				<span id="Phorseback"><b>馬術</b> - 建立馬廄</span>
+				<span id="Pwheel"><b>車輪</b> - 建立磨坊</span>
+				<span id="Pwriting"><b>文學</b> - 增加神職人員虔誠產量</span>
+				<span id="Padministration"><b>行政</b> - 增加劫掠時征來的土地</span>
+				<span id="Pcodeoflaws"><b>法典</b> - 減少人口擁擠所導致的不滿</span>
+				<span id="Pmathematics"><b>數學</b> - 建立攻城塔</span>
+				<span id="Paesthetics"><b>美學</b> - 建立神殿可增加滿意度</span>
+				<span id="Pcivilservice"><b>文官</b> - 增加點擊可獲的基本資源</span>
+				<span id="Pfeudalism"><b>封建制度</b> - 點擊可獲得更多資源</span>
+				<span id="Pguilds"><b>行會</b> - 增加點擊可獲得的特殊資源</span>
+				<span id="Pserfs"><b>農奴</b> - 無業工人可增加點擊時所獲得的資源</span>
+				<span id="Pnationalism"><b>民族主義</b> - 士兵增加點擊所獲得的基本資源</span>
+				<span id="Pworship"><b>崇拜</b> - 允許崇拜神明</span>
+				<span id="Pstandard"><b>軍旗</b> - 可建立軍隊</span>
+				<span id="Ptrade"><b>貿易</b> - 開商棧</span>
+				<span id="Pcurrency"><b>通貨</b> - 商人更加頻繁來做生意, 留下時間也更加長</span>
+				<span id="Pcommerce"><b>商業</b> - 商人更加頻繁來做生意, 留下時間也更加長</span>
+			</div>
+		</div>
+		
+		<div id="deityPane">
+		<h3>神明</h3>
+			<span id="deityLine"><button id="deity" onmousedown="upgrade('deity')" disabled>崇拜<br />(1000個虔誠)</button><span class="note">開始崇拜神明 (需要神殿)</span><br />
+			<br /></span>
+			<div id="deitySpecialisation">
+				<button id="deityBattle" onmousedown="upgrade('deityBattle')">戰神<br />(500個虔誠)</button><span class="note">註: 只可選一個</span><br />
+				<button id="deityFields" onmousedown="upgrade('deityFields')">田神<br />(500個虔誠)</button><span class="note">註: 只可選一個</span><br />
+				<button id="deityUnderworld" onmousedown="upgrade('deityUnderworld')">冥王<br />(500個虔誠)</button><span class="note">註: 只可選一個</span><br />
+				<button id="deityCats" onmousedown="upgrade('deityCats')">神貓<br />(500個虔誠)</button><span class="note">註: 只可選一個</span><br />
+			</div>
+			<div id="battleUpgrades">
+				<h3>戰力</h3>
+				<table>
+					<tr>
+						<td class="devcost"></td>
+						<td id="battleRow"><span><button onmousedown="createBuilding(battleAltar,1)">建立祭壇</button></span></td>
+						<td><span class="cost">200個石材, 200個虔誠, <span id="battleAltarCost">50</span>個金屬</span><span class="note">: +1忠誠</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">10個忠誠</td>
+						<td><button id="riddle" onmousedown="upgrade('riddle')" disabled>鋼鐵之謎</button></td>
+						<td><span class="cost">1000個虔誠</span><span class="note">: 增加士兵效率</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">20個忠誠</td>
+						<td><button onmousedown="smite()" id="smiteInvaders" disabled>重擊侵略者</button></td>
+						<td><span class="cost">每個侵略者需100個虔誠</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">30個忠誠</td>
+						<td><button id="throne" onmousedown="upgrade('throne')" disabled>Throne of Skulls</button></td>
+						<td><span class="cost">1000個虔誠</span><span class="note">: slaying enemies creates temples</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">40個忠誠</td>
+						<td><button onmousedown="glory(180)" id="glory" disabled>For Glory!</button></td>
+						<td><span class="cost">1000個虔誠</span><span class="note">: Temporarily makes raids more difficult, increases rewards</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">50個忠誠</td>
+						<td><button id="lament" onmousedown="upgrade('lament')" disabled>Lament of the Defeated</button></td>
+						<td><span class="cost">5000個虔誠</span><span class="note">: Successful raids delay future invasions</span></td>
+					</tr>
+				</table>
+			</div>
+			<div id="fieldsUpgrades">
+				<h3>The Bounty of the Fields</h3>
+				<table>
+					<tr>
+						<td class="devcost"></td>
+						<td id="fieldsRow"><span><button onmousedown="createBuilding(fieldsAltar,1)">建立祭壇</button></span></td>
+						<td><span class="cost"><span id="fieldsAltarFoodCost">500</span>個食物, <span id="fieldsAltarWoodCost">500</span>個木材, 200個石材, 200個虔誠</span><span class="note">: +1 devotion</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">10個忠誠</td>
+						<td><button id="blessing" onmousedown="upgrade('blessing')" disabled>Blessing of Abundance</button></td>
+						<td><span class="cost">1000個虔誠</span><span class="note">: 增加農夫產量</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">20個忠誠</td>
+						<td><button id="wickerman" onmousedown="wickerman()" disabled>Burn Wicker Man</button></td>
+						<td><span class="cost">500個木材, 1 worker</span><span class="note">: random bonus to a resource</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">30個忠誠</td>
+						<td><button id="waste" onmousedown="upgrade('waste')" disabled>Abide No Waste</button></td>
+						<td><span class="cost">1000個虔誠</span><span class="note">: workers will eat corpses if there is no food left</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">40個忠誠</td>
+						<td><button id="walk" onmousedown="walk(1)" disabled>Walk Behind The Rows</button><br /><button id="ceaseWalk" onmousedown="walk(0)" disabled>Cease Walking</button></td>
+						<td><span class="cost">1 worker per second</span><span class="note">: boost food production</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">50個忠誠</td>
+						<td><button id="stay" onmousedown="upgrade('stay')" disabled>Stay With Us</button></td>
+						<td><span class="cost">5000個虔誠</span><span class="note">: traders stay longer</span></td>
+					</tr>
+				</table>
+			</div>
+			<div id="underworldUpgrades">
+				<h3>The Dread Power of the Underworld</h3>
+				<table>
+					<tr>
+						<td class="devcost"></td>
+						<td id="underworldRow"><span><button onmousedown="createBuilding(underworldAltar,1)">建立祭壇</button></span></td>
+						<td><span class="cost">200個石材, 200個虔誠, <span id="underworldAltarCost">1</span> corpses</span><span class="note">: +1 devotion</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">10個忠誠</td>
+						<td><button id="book" onmousedown="upgrade('book')" disabled>The Book of the Dead</button></td>
+						<td><span class="cost">1000個虔誠</span><span class="note">: gain piety with deaths</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">20個忠誠</td>
+						<td><button onmousedown="raiseDead(1)" id="raiseDead" disabled>Raise Dead</button><button onmousedown="raiseDead(100)" id="raiseDead100" class="x100" disabled>x100</button><button onmousedown="raiseDead(1000)" id="raiseDead1000" class="x1000" disabled>x1000</button></td>
+						<td><span id="zombieCost" class="cost">1</span><span class="cost">個虔誠: to raise the next zombie</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">30個忠誠</td>
+						<td><button id="feast" onmousedown="upgrade('feast')" disabled>A Feast for Crows</button></td>
+						<td><span class="cost">1000個虔誠</span><span class="note">: corpses are less likely to cause illness</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">40個忠誠</td>
+						<td><button onmousedown="shade()" id="shade" disabled>Summon Shades</button></td>
+						<td><span class="cost">1000個虔誠</span><span class="note">: Souls of the defeated rise to fight for you</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">50個忠誠</td>
+						<td><button id="secrets" onmousedown="upgrade('secrets')" disabled>Secrets of the Tombs</button></td>
+						<td><span class="cost">5000個虔誠</span><span class="note">: graveyards increase cleric piety generation</span></td>
+					</tr>
+				</table>
+			</div>
+			<div id="catsUpgrades">
+				<h3>The Grace of Cats</h3>
+				<table>
+					<tr>
+						<td class="devcost"></td>
+						<td id="catRow"><span><button onmousedown="createBuilding(catAltar,1)">建立祭壇</button></span></td>
+						<td><span class="cost">200個石材, 200個虔誠, <span id="catAltarCost">100</span>個藥草</span><span class="note">: +1 devotion</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">10個忠誠</td>
+						<td><button id="lure" onmousedown="upgrade('lure')" disabled>Lure of Civilisation</button></td>
+						<td><span class="cost">1000個虔誠</span><span class="note">: increase chance to get cats</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">20個忠誠</td>
+						<td><button onmousedown="pestControl(10)" id="pestControl" disabled>Pest Control</button></td>
+						<td><span class="cost">100個虔誠</span><span class="note">: Give temporary boost to food production</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">30個忠誠</td>
+						<td><button id="companion" onmousedown="upgrade('companion')" disabled>Warmth of the Companion</button></td>
+						<td><span class="cost">1000個虔誠</span><span class="note">: cats help heal the sick</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">40個忠誠</td>
+						<td><button onmousedown="grace(0.1)" id="grace" disabled>Grace</button></td>
+						<td><span class="cost"><span id="graceCost">1000</span>個虔誠</span><span class="note">: Increase Happiness</span></td>
+					</tr>
+					<tr>
+						<td class="devcost">50個忠誠</td>
+						<td><button id="comfort" onmousedown="upgrade('comfort')" disabled>Comfort of the Hearthfires</button></td>
+						<td><span class="cost">5000個虔誠</span><span class="note">: traders marginally more frequent</span></td>
+					</tr>
+				</table>
+			</div>
+			<div id="iconoclasmGroup">
+				<br />
+				<button id="iconoclasm" onmousedown="iconoclasmList()">Iconoclasm<br />(1000個虔誠)</button><span class="note">Remove an old deity</span><br />
+				<div id="iconoclasmList"></div>
+			</div>
+		</div>
+		<div id="conquestPane">
+		<h3>征戰</h3>
+			<span id="standardLine"><button id="standard" onmousedown="upgrade('standard')" disabled>軍旗<br />(1000個金屬和個皮革)</button><span class="note">允許成立軍隊 (需要兵營)</span><br /></span>
+			<div id="conquest">
+				<h4>軍隊</h4>
+				<table id="party">
+				<tr id="customArmyIncrement">
+					<td class="jobNone"></td>
+					<td class="jobCustom"></td>
+					<td class="job100"></td>
+					<td class="job10"></td>
+					<td></td>
+					<td>增加:</td>
+					<td><input id="armyCustom" type="number" min="1" step="1" value="1" /></td>
+					<td></td>
+					<td class="job10"></td>
+					<td class="job100"></td>
+					<td class="jobCustom"></td>
+					<td class="jobAll"></td>
+					<td><span class="note"></span></td>
+				</tr>
+				<tr id="fsoldiergroup">
+					<td class="jobNone"><button onmousedown="party('soldiers','leaveAll');">-全部</button></td>
+					<td class="jobCustom"><button onmousedown="partyCustom('soldiers',-1);">-自定義</button></td>
+					<td class="job100"><button onmousedown="party('soldiers',-100);">-100</button></td>
+					<td class="job10"><button onmousedown="party('soldiers',-10);">-10</button></td>
+					<td><button onmousedown="party('soldiers',-1);">&lt;</button></td>
+					<td class="job">士兵: </td>
+					<td class="number"><span id="partySoldiers">0</span></td>
+					<td><button onmousedown="party('soldiers',1);">&gt;</button></td>
+					<td class="job10"><button onmousedown="party('soldiers',10);">+10</button></td>
+					<td class="job100"><button onmousedown="party('soldiers',100);">+100</button></td>
+					<td class="jobCustom"><button onmousedown="partyCustom('soldiers',+1);">+自定義</button></td>
+					<td class="jobAll"><button onmousedown="party('soldiers','takeAll');">所有</button></td>
+					<td><span class="note"></span></td>
+				</tr>
+				<tr id="fcavalrygroup">
+					<td class="jobNone"><button onmousedown="party('cavalry','leaveAll');">-全部</button></td>
+					<td class="jobCustom"><button onmousedown="partyCustom('cavalry',-1);">-自定義</button></td>
+					<td class="job100"><button onmousedown="party('cavalry',-100);">-100</button></td>
+					<td class="job10"><button onmousedown="party('cavalry',-10);">-10</button></td>
+					<td><button onmousedown="party('cavalry',-1);">&lt;</button></td>
+					<td class="job"><span id="ecavName">騎兵</span>: </td>
+					<td class="number"><span id="partyCavalry">0</span></td>
+					<td><button onmousedown="party('cavalry',1);">&gt;</button></td>
+					<td class="job10"><button onmousedown="party('cavalry',10);">+10</button></td>
+					<td class="job100"><button onmousedown="party('cavalry',100);">+100</button></td>
+					<td class="jobCustom"><button onmousedown="partyCustom('cavalry',+1);">+自定義</button></td>
+					<td class="jobAll"><button onmousedown="party('cavalry','takeAll');">所有</button></td>
+					<td><span class="note"></span></td>
+				</tr>
+				<tr id="fsiegegroup">
+					<td class="jobNone"></td>
+					<td class="jobCustom"></td>
+					<td class="job100"></td>
+					<td class="job10"></td>
+					<td></td>
+					<td class="job">攻城塔: </td>
+					<td class="number"><span id="partySiege">0</span></td>
+					<td><button onmousedown="party('siege',1);">&gt;</button></td>
+					<td class="job10"><button onmousedown="party('siege',10);">+10</button></td>
+					<td class="job100"><button onmousedown="party('siege',100);">+100</button></td>
+					<td class="jobCustom"><button onmousedown="partyCustom('siege',+1);">+自定義</button></td>
+					<td></td>
+					<td><span class="cost">50個金屬, 50個皮革, 200個木材</span></td>
+				</tr>
+				<tr id="esoldiergroup">
+					<td class="jobNone"></td>
+					<td class="jobCustom"></td>
+					<td class="job100"></td>
+					<td class="job10"></td>
+					<td></td>
+					<td class="enemy">敵軍: </td>
+					<td class="number"><span id="esoldiers">0</span></td>
+					<td></td>
+					<td class="job10"></td>
+					<td class="job100"></td>
+					<td class="jobCustom"></td>
+					<td class="jobAll"></td>
+					<td><span class="note"></span></td>
+				</tr>
+				<tr id="efortgroup">
+					<td class="jobNone"></td>
+					<td class="jobCustom"></td>
+					<td class="job100"></td>
+					<td class="job10"></td>
+					<td></td>
+					<td class="enemy">防禦工事: </td>
+					<td class="number"><span id="eforts">0</span></td>
+					<td></td>
+					<td class="job10"></td>
+					<td class="job100"></td>
+					<td class="jobCustom"></td>
+					<td class="jobAll"></td>
+					<td><span class="note"></span></td>
+				</tr>
+				</table>
+				<br />
+				<div id="raidGroup">
+					<h4>開戰!</h4>
+					<p id="gloryGroup">
+						榮耀: 還剩<span id="gloryTimer">0</span>秒鐘
+					</p>
+					<button class="raid" data-civtype="thorp" onmousedown="onInvade(event)">突襲村莊</button><br />
+					<button class="raid" data-civtype="hamlet" onmousedown="onInvade(event)" disabled>突襲部落</button><br />
+					<button class="raid" data-civtype="village" onmousedown="onInvade(event)" disabled>突襲鄉村</button><br />
+					<button class="raid" data-civtype="smallTown" onmousedown="onInvade(event)" disabled>突襲小鎮</button><br />
+					<button class="raid" data-civtype="largeTown" onmousedown="onInvade(event)" disabled>突襲城鎮</button><br />
+					<button class="raid" data-civtype="smallCity" onmousedown="onInvade(event)" disabled>突襲小城</button><br />
+					<button class="raid" data-civtype="largeCity" onmousedown="onInvade(event)" disabled>突襲大城</button><br />
+					<button class="raid" data-civtype="metropolis" onmousedown="onInvade(event)" disabled>突襲都市</button><br />
+					<button class="raid" data-civtype="smallNation" onmousedown="onInvade(event)" disabled>突襲小國</button><br />
+					<button class="raid" data-civtype="nation" onmousedown="onInvade(event)" disabled>突襲國家</button><br />
+					<button class="raid" data-civtype="largeNation" onmousedown="onInvade(event)" disabled>突襲大國</button><br />
+					<button class="raid" data-civtype="empire" onmousedown="onInvade(event)" disabled>突襲帝國</button><br />
+				</div>
+				<div id="victoryGroup">
+					<h4>勝利!</h4>
+					<button id="plunder" onmousedown="plunder()">掠奪資源</button><br />
+				</div>
+			</div>
+		</div>
+		<div id="tradePane">
+		<h3>貿易</h3>
+			<span id="tradeLine"><button id="tradeUpgrade" onmousedown="upgrade('trade')" disabled>貿易<br />(1個黃金)</button><span class="note">開商棧</span><br /><br /></span>
+			<div id="tradeUpgradeContainer">
+				<span id="currencyLine"><button id="currency" onmousedown="upgrade('currency')" disabled>通貨<br />(10個黃金, 1000個礦石)</button><span class="note">商人更加頻繁來做生意, 留下時間也更加長</span><br /></span>
+				<span id="commerceLine"><button id="commerce" onmousedown="upgrade('commerce')" disabled>商業<br />(100個黃金, 10000個虔誠)</button><span class="note">商人更加頻繁來做生意, 留下時間也更加長</span><br /></span>
+				<div id="speedWonderGroup"><br /><button id="speedWonder" onmousedown="speedWonder()">鞭策奇觀工人<br />(100個黃金)</button><span class="note">增加奇觀進度</span></div>
+				<h4>購買資源 (1個黃金)</h4>
+				<button class="tradeResource" onmousedown="buy(food)">買5000個食物</button><br />
+				<button class="tradeResource" onmousedown="buy(wood)">買5000個木材</button><br />
+				<button class="tradeResource" onmousedown="buy(stone)">買5000個石材</button><br />
+				<button class="tradeResource" onmousedown="buy(skins)">買500個獸皮</button><br />
+				<button class="tradeResource" onmousedown="buy(herbs)">買500個藥草</button><br />
+				<button class="tradeResource" onmousedown="buy(ore)">買500個礦石</button><br />
+				<button class="tradeResource" onmousedown="buy(leather)">買250個皮革</button><br />
+				<button class="tradeResource" onmousedown="buy(metal)">買250個金屬</button><br />
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="population">
+	<div id="populationContainer">
+		<h3>人口</h3>
+		<div id="populationNumbers">
+			<table>
+				<tr>
+					<td>目前總人口: </td>
+					<td class="number"><span id="popcurrent">0</span></td>
+				</tr>
+				<tr>
+					<td>最大人口: </td>
+					<td class="number"><span id="popcap">0</span></td>
+				</tr>
+			</table>
+			<br />
+		</div>
+		<div id="populationCreate">
+			<div id="spawn1group"><button id="spawn1" onmousedown="spawn(1)" disabled>創建工人</button><span class="cost"><span id="workerCost">20</span>個食物</span><span class="note">: 創建新工人</span><br /></div>
+			<div id='spawn10'><button id="spawn10button" onmousedown="spawn(10)">創建10工人</button><span class="cost"><span id="workerCost10">200</span>個食物</span><span class="note">: 創建10新工人</span></div>
+			<div id='spawn100'><button id="spawn100button" onmousedown="spawn(100)">創建100工人</button><span class="cost"><span id="workerCost100">2000</span>個食物</span><span class="note">: 創建100新工人</span></div>
+			<div id='spawn1000'><button id="spawn1000button" onmousedown="spawn(1000)">創建1000工人</button><span class="cost"><span id="workerCost1000">20000</span>個食物</span><span class="note">: 創建1000新工人</span></div>
+			<div id="customSpawnIncrement"><input id="spawnCustom" type="number" min="1" step="1" value="1" /><button id="spawnCustomButton" onmousedown="spawnCustom()">創建工人</button></div>
+		</div>
+	</div>
+	<div id="jobsContainer">
+		<h3>職業</h3>
+		<table id="jobs">
+			<tr id="customJobIncrement">
+				<td class="jobNone"></td>
+				<td class="jobCustom"></td>
+				<td class="job100"></td>
+				<td class="job10"></td>
+				<td></td>
+				<td>增加:</td>
+				<td><input id="jobCustom" type="number" min="1" step="1" value="1" /></td>
+				<td></td>
+				<td class="job10"></td>
+				<td class="job100"></td>
+				<td class="jobCustom"></td>
+				<td class="jobAll"></td>
+				<td><span class="note"></span></td>
+			</tr>
+			<tr id="unempgroup">
+				<td class="jobNone"></td>
+				<td class="jobCustom"></td>
+				<td class="job100"></td>
+				<td class="job10"></td>
+				<td></td>
+				<td>無業: </td>
+				<td class="number"><span id="unemployed">0</span></td>
+				<td></td>
+				<td class="job10"></td>
+				<td class="job100"></td>
+				<td class="jobCustom"></td>
+				<td class="jobAll"></td>
+				<td><span class="note">未分配工人</span></td>
+			</tr>
+			<tr id="sickGroup">
+				<td class="jobNone"></td>
+				<td class="jobCustom"></td>
+				<td class="job100"></td>
+				<td class="job10"></td>
+				<td></td>
+				<td>患病: </td>
+				<td class="number"><span id="sickTotal">0</span></td>
+				<td></td>
+				<td class="job10"></td>
+				<td class="job100"></td>
+				<td class="jobCustom"></td>
+				<td class="jobAll"></td>
+				<td><span class="note">患病工人</span></td>
+			</tr>
+			<tr id="farmergroup">
+				<td class="jobNone"><button onmousedown="fireAll('farmers');">-全部</button></td>
+				<td class="jobCustom"><button onmousedown="fireCustom('farmers');">-自定義</button></td>
+				<td class="job100"><button onmousedown="fire('farmers',100);">-100</button></td>
+				<td class="job10"><button onmousedown="fire('farmers',10);">-10</button></td>
+				<td><button onmousedown="fire('farmers',1);">&lt;</button></td>
+				<td class="job">農夫: </td>
+				<td class="number"><span id="farmers">0</span></td>
+				<td><button onmousedown="hire('farmers',1);">&gt;</button></td>
+				<td class="job10"><button onmousedown="hire('farmers',10);">+10</button></td>
+				<td class="job100"><button onmousedown="hire('farmers',100);">+100</button></td>
+				<td class="jobCustom"><button onmousedown="hireCustom('farmers');">+自定義</button></td>
+				<td class="jobAll"><button onmousedown="hireAll('farmers');">最多</button></td>
+				<td><span class="note">自動採集食物</span></td>
+			</tr>
+			<tr id="woodcuttergroup">
+				<td class="jobNone"><button onmousedown="fireAll('woodcutters');">-全部</button></td>
+				<td class="jobCustom"><button onmousedown="fireCustom('woodcutters');">-自定義</button></td>
+				<td class="job100"><button onmousedown="fire('woodcutters',100);">-100</button></td>
+				<td class="job10"><button onmousedown="fire('woodcutters',10);">-10</button></td>
+				<td><button onmousedown="fire('woodcutters',1);">&lt;</button></td>
+				<td class="job">伐木工: </td>
+				<td class="number"><span id="woodcutters">0</span></td>
+				<td><button onmousedown="hire('woodcutters',1);">&gt;</button></td>
+				<td class="job10"><button onmousedown="hire('woodcutters',10);">+10</button></td>
+				<td class="job100"><button onmousedown="hire('woodcutters',100);">+100</button></td>
+				<td class="jobCustom"><button onmousedown="hireCustom('woodcutters');">+自定義</button></td>
+				<td class="jobAll"><button onmousedown="hireAll('woodcutters');">最多</button></td>
+				<td><span class="note">自動採集木材</span></td>
+			</tr>
+			<tr id="minergroup">
+				<td class="jobNone"><button onmousedown="fireAll('miners');">-全部</button></td>
+				<td class="jobCustom"><button onmousedown="fireCustom('miners');">-自定義</button></td>
+				<td class="job100"><button onmousedown="fire('miners',100);">-100</button></td>
+				<td class="job10"><button onmousedown="fire('miners',10);">-10</button></td>
+				<td><button onmousedown="fire('miners',1);">&lt;</button></td>
+				<td class="job">礦工: </td>
+				<td class="number"><span id="miners">0</span></td>
+				<td><button onmousedown="hire('miners',1);">&gt;</button></td>
+				<td class="job10"><button onmousedown="hire('miners',10);">+10</button></td>
+				<td class="job100"><button onmousedown="hire('miners',100);">+100</button></td>
+				<td class="jobCustom"><button onmousedown="hireCustom('miners');">+自定義</button></td>
+				<td class="jobAll"><button onmousedown="hireAll('miners');">最多</button></td>
+				<td><span class="note">自動採集石頭</span></td>
+			</tr>
+			<tr id="tannergroup">
+				<td class="jobNone"><button onmousedown="fireAll('tanners');">-全部</button></td>
+				<td class="jobCustom"><button onmousedown="fireCustom('tanners');">-自定義</button></td>
+				<td class="job100"><button onmousedown="fire('tanners',100);">-100</button></td>
+				<td class="job10"><button onmousedown="fire('tanners',10);">-10</button></td>
+				<td><button onmousedown="fire('tanners',1);">&lt;</button></td>
+				<td class="job">皮匠: </td>
+				<td class="number"><span id="tanners">0</span></td>
+				<td><button onmousedown="hire('tanners',1);">&gt;</button></td>
+				<td class="job10"><button onmousedown="hire('tanners',10);">+10</button></td>
+				<td class="job100"><button onmousedown="hire('tanners',100);">+100</button></td>
+				<td class="jobCustom"><button onmousedown="hireCustom('tanners');">+自定義</button></td>
+				<td class="jobAll"><button onmousedown="hireAll('tanners');">最多</button></td>
+				<td><span class="note">用獸皮製作皮革</span></td>
+			</tr>
+			<tr id="blacksmithgroup">
+				<td class="jobNone"><button onmousedown="fireAll('blacksmiths');">-全部</button></td>
+				<td class="jobCustom"><button onmousedown="fireCustom('blacksmiths');">-自定義</button></td>
+				<td class="job100"><button onmousedown="fire('blacksmiths',100);">-100</button></td>
+				<td class="job10"><button onmousedown="fire('blacksmiths',10);">-10</button></td>
+				<td><button onmousedown="fire('blacksmiths',1);">&lt;</button></td>
+				<td class="job">鐵匠: </td>
+				<td class="number"><span id="blacksmiths">0</span></td>
+				<td><button onmousedown="hire('blacksmiths',1);">&gt;</button></td>
+				<td class="job10"><button onmousedown="hire('blacksmiths',10);">+10</button></td>
+				<td class="job100"><button onmousedown="hire('blacksmiths',100);">+100</button></td>
+				<td class="jobCustom"><button onmousedown="hireCustom('blacksmiths');">+自定義</button></td>
+				<td class="jobAll"><button onmousedown="hireAll('blacksmiths');">最多</button></td>
+				<td><span class="note">用礦石製作金屬</span></td>
+			</tr>
+			<tr id="apothecarygroup">
+				<td class="jobNone"><button onmousedown="fireAll('apothecaries');">-全部</button></td>
+				<td class="jobCustom"><button onmousedown="fireCustom('apothecaries');">-自定義</button></td>
+				<td class="job100"><button onmousedown="fire('apothecaries',100);">-100</button></td>
+				<td class="job10"><button onmousedown="fire('apothecaries',10);">-10</button></td>
+				<td><button onmousedown="fire('apothecaries',1);">&lt;</button></td>
+				<td class="job">藥劑師: </td>
+				<td class="number"><span id="apothecaries">0</span></td>
+				<td><button onmousedown="hire('apothecaries',1);">&gt;</button></td>
+				<td class="job10"><button onmousedown="hire('apothecaries',10);">+10</button></td>
+				<td class="job100"><button onmousedown="hire('apothecaries',100);">+100</button></td>
+				<td class="jobCustom"><button onmousedown="hireCustom('apothecaries');">+自定義</button></td>
+				<td class="jobAll"><button onmousedown="hireAll('apothecaries');">最多</button></td>
+				<td><span class="note">醫治患病工人</span></td>
+			</tr>
+			<tr id="clericgroup">
+				<td class="jobNone"><button onmousedown="fireAll('clerics');">-全部</button></td>
+				<td class="jobCustom"><button onmousedown="fireCustom('clerics');">-自定義</button></td>
+				<td class="job100"><button onmousedown="fire('clerics',100);">-100</button></td>
+				<td class="job10"><button onmousedown="fire('clerics',10);">-10</button></td>
+				<td><button onmousedown="fire('clerics',1);">&lt;</button></td>
+				<td class="job">神職人員: </td>
+				<td class="number"><span id="clerics">0</span></td>
+				<td><button onmousedown="hire('clerics',1);">&gt;</button></td>
+				<td class="job10"><button onmousedown="hire('clerics',10);">+10</button></td>
+				<td class="job100"><button onmousedown="hire('clerics',100);">+100</button></td>
+				<td class="jobCustom"><button onmousedown="hireCustom('clerics');">+自定義</button></td>
+				<td class="jobAll"><button onmousedown="hireAll('clerics');">最多</button></td>
+				<td><span class="note">生成虔誠, 埋葬屍首</span></td>
+			</tr>
+			<tr id="labourergroup">
+				<td class="jobNone"><button onmousedown="fireAll('labourers');">-全部</button></td>
+				<td class="jobCustom"><button onmousedown="fireCustom('labourers');">-自定義</button></td>
+				<td class="job100"><button onmousedown="fire('labourers',100);">-100</button></td>
+				<td class="job10"><button onmousedown="fire('labourers',10);">-10</button></td>
+				<td><button onmousedown="fire('labourers',1);">&lt;</button></td>
+				<td class="job">奇觀勞工: </td>
+				<td class="number"><span id="labourers">0</span></td>
+				<td><button onmousedown="hire('labourers',1);">&gt;</button></td>
+				<td class="job10"><button onmousedown="hire('labourers',10);">+10</button></td>
+				<td class="job100"><button onmousedown="hire('labourers',100);">+100</button></td>
+				<td class="jobCustom"><button onmousedown="hireCustom('labourers');">+自定義</button></td>
+				<td class="jobAll"><button onmousedown="hireAll('labourers');">最多</button></td>
+				<td><span class="note">用資源建立奇觀</span></td>
+			</tr>
+			<tr id="soldiergroup">
+				<td class="jobNone"><button onmousedown="fireAll('soldiers');">-全部</button></td>
+				<td class="jobCustom"><button onmousedown="fireCustom('soldiers');">-自定義</button></td>
+				<td class="job100"><button onmousedown="fire('soldiers',100);">-100</button></td>
+				<td class="job10"><button onmousedown="fire('soldiers',10);">-10</button></td>
+				<td><button onmousedown="fire('soldiers',1);">&lt;</button></td>
+				<td class="job">士兵: </td>
+				<td class="number"><span id="soldiers">0</span></td>
+				<td><button onmousedown="hire('soldiers',1);">&gt;</button></td>
+				<td class="job10"><button onmousedown="hire('soldiers',10);">+10</button></td>
+				<td class="job100"><button onmousedown="hire('soldiers',100);">+100</button></td>
+				<td class="jobCustom"><button onmousedown="hireCustom('soldiers');">+自定義</button></td>
+				<td class="jobAll"><button onmousedown="hireAll('soldiers');">最多</button></td>
+				<td><span class="cost">10個金屬, 10個皮革</span><span class="note">: 保衛文明以免受敵人的攻擊</span></td>
+			</tr>
+			<tr id="cavalrygroup">
+				<td class="jobNone"><button onmousedown="fireAll('cavalry');">-全部</button></td>
+				<td class="jobCustom"><button onmousedown="fireCustom('cavalry');">-自定義</button></td>
+				<td class="job100"><button onmousedown="fire('cavalry',100);">-100</button></td>
+				<td class="job10"><button onmousedown="fire('cavalry',10);">-10</button></td>
+				<td><button onmousedown="fire('cavalry',1);">&lt;</button></td>
+				<td class="job"><span id="cavName">騎兵</span>: </td>
+				<td class="number"><span id="cavalry">0</span></td>
+				<td><button onmousedown="hire('cavalry',1);">&gt;</button></td>
+				<td class="job10"><button onmousedown="hire('cavalry',10);">+10</button></td>
+				<td class="job100"><button onmousedown="hire('cavalry',100);">+100</button></td>
+				<td class="jobCustom"><button onmousedown="hireCustom('cavalry');">+自定義</button></td>
+				<td class="jobAll"><button onmousedown="hireAll('cavalry');">最多</button></td>
+				<td><span class="cost">20個食物, 20個皮革</span><span class="note">: 保衛文明以免受敵人的攻擊</span></td>
+			</tr>
+			<tr id="shadesgroup">
+				<td class="jobNone"></td>
+				<td class="jobCustom"></td>
+				<td class="job100"></td>
+				<td class="job10"></td>
+				<td></td>
+				<td>Shades: </td>
+				<td class="number"><span id="shades">0</span></td>
+				<td></td>
+				<td class="job10"></td>
+				<td class="job100"></td>
+				<td class="jobCustom"></td>
+				<td class="jobAll"></td>
+				<td><span class="note">無實體鬼</span></td>
+			</tr>
+			<tr id="wolfgroup">
+				<td class="jobNone"></td>
+				<td class="jobCustom"></td>
+				<td class="job100"></td>
+				<td class="job10"></td>
+				<td></td>
+				<td class="enemy">野狼: </td>
+				<td class="number"><span id="wolves">0</span></td>
+				<td></td>
+				<td class="job10"></td>
+				<td class="job100"></td>
+				<td class="jobCustom"></td>
+				<td class="jobAll"></td>
+				<td><span class="note"></span></td>
+			</tr>
+			<tr id="banditgroup">
+				<td class="jobNone"></td>
+				<td class="jobCustom"></td>
+				<td class="job100"></td>
+				<td class="job10"></td>
+				<td></td>
+				<td class="enemy">土匪: </td>
+				<td class="number"><span id="bandits">0</span></td>
+				<td></td>
+				<td class="job10"></td>
+				<td class="job100"></td>
+				<td class="jobCustom"></td>
+				<td class="jobAll"></td>
+				<td><span class="note"></span></td>
+			</tr>
+			<tr id="barbariangroup">
+				<td class="jobNone"></td>
+				<td class="jobCustom"></td>
+				<td class="job100"></td>
+				<td class="job10"></td>
+				<td></td>
+				<td class="enemy">蠻族: </td>
+				<td class="number"><span id="barbarians">0</span></td>
+				<td></td>
+				<td class="job10"></td>
+				<td class="job100"></td>
+				<td class="jobCustom"></td>
+				<td class="jobAll"></td>
+				<td><span class="note"></span></td>
+			</tr>
+			<tr id="esiegegroup">
+				<td class="jobNone"></td>
+				<td class="jobCustom"></td>
+				<td class="job100"></td>
+				<td class="job10"></td>
+				<td></td>
+				<td class="enemy">攻城塔: </td>
+				<td class="number"><span id="esiege">0</span></td>
+				<td></td>
+				<td class="job10"></td>
+				<td class="job100"></td>
+				<td class="jobCustom"></td>
+				<td class="jobAll"></td>
+				<td><span class="note"></span></td>
+			</tr>
+		</table>
+	</div>
+	<div id="tradeContainer">
+		商人想要<span id="tradeRequested">0</span> <span id="tradeType">食物</span><br />
+		<button id="trade" onmousedown="trade()">交換</button>
+	</div>
+	<div id="wondersContainer">
+		<div id="wonderBuilding">
+			<div id="inProgress">
+				<span class="wonderTitle"><span id="wonderNameP">奇觀</span>進度<span id="progressNumber">0</span>%</span> - <button id="renameWonder" onmousedown="renameWonder()">重命名</button>
+				<div id="progressContainer"><div id="progressBar"></div></div>
+				<div id="lowResources">受到<span id="limited">資源不足</span>的限制</div>
+			</div>
+			<div id="completed">
+				<div class="wonderTitle"><span id="wonderNameC">奇觀</span>建立成功! 選擇紅利:</div>
+				<button class="wonderBonus" onmousedown="wonderBonus('Food')">食物</button>
+				<button class="wonderBonus" onmousedown="wonderBonus('Wood')">木材</button>
+				<button class="wonderBonus" onmousedown="wonderBonus('Stone')">石材</button><br />
+				<button class="wonderBonus" onmousedown="wonderBonus('Skins')">獸皮</button>
+				<button class="wonderBonus" onmousedown="wonderBonus('Herbs')">藥草</button>
+				<button class="wonderBonus" onmousedown="wonderBonus('Ore')">礦石</button><br />
+				<button class="wonderBonus" onmousedown="wonderBonus('Leather')">皮革</button>
+				<button class="wonderBonus" onmousedown="wonderBonus('Piety')">虔誠</button>
+				<button class="wonderBonus" onmousedown="wonderBonus('Metal')">金屬</button>
+			</div>
+		</div>
+	</div>
+	<div id="eventsContainer">
+		<h3>事件</h3>
+        <table id="logTable">
+            <tr id="log0"><td id="logT"></td><td id="logL"></td><td id="logR"></td></tr>
+	        <tr id="log1"><td colspan="3"></td></tr>
+	        <tr id="log2"><td colspan="3"></td></tr>
+	        <tr id="log3"><td colspan="3"></td></tr>
+	        <tr id="log4"><td colspan="3"></td></tr>
+	        <!-- <tr id="log5"><td colspan="3"></td></tr>
+	        <tr id="log6"><td colspan="3"></td></tr>
+	        <tr id="log7"><td colspan="3"></td></tr>
+	        <tr id="log8"><td colspan="3"></td></tr>
+	        <tr id="log9"><td colspan="3"></td></tr> -->
+        </table>
+	</div>
+	<div id="pantheonContainer">
+		<h3>萬神殿</h3>
+		<table id="activeDeity">
+			<tr id="deity1">
+				<td><strong><span id="deity1Name">無神明</span></strong><span id="deity1Type" class="deityType"></span></td>
+				<td>忠誠: <span id="devotion1">0</span></td>
+				<td class="removeDeity"><button class="removeDeity" onmousedown="removeDeity(deity1)">X</button></td>
+			</tr>
+		</table>
+		<br />
+		<table id="oldDeities"><tr><td></td></tr></table>
+	</div>
+	<div id="permaUpgradeContainer">
+		<h3>萬神殿附加功能</h3>
+		<table>
+			<tr id="pRiddle"><td><strong>鋼鐵之謎</strong>: </td><td>增加士兵效率</td></tr>
+			<tr id="pThrone"><td><strong>頭顱之座</strong>: </td><td>宰殺敵人可建立神殿</td></tr>
+			<tr id="pLament"><td><strong>敗仗者之輓歌</strong>: </td><td>突襲成功則延遲侵略者來襲</td></tr>
+			<tr id="pBook"><td><strong>死者之書</strong>: </td><td>人口死了可獲得虔誠</td></tr>
+			<tr id="pFeast"><td><strong>烏鴉食腐</strong>: </td><td>屍首不易導致疫病</td></tr>
+			<tr id="pSecrets"><td><strong>陵墓之秘</strong>: </td><td>墓地可增加神職人員的虔誠產量</td></tr>
+			<tr id="pLure"><td><strong>文明之魅力</strong>: </td><td>增加神貓的機率</td></tr>
+			<tr id="pCompanion"><td><strong>夥伴之溫柔</strong>: </td><td>神貓幫忙醫治病患</td></tr>
+			<tr id="pComfort"><td><strong>爐火之慰</strong>: </td><td>商人更加頻繁來做生意</td></tr>
+			<tr id="pBlessing"><td><strong>豐收之恩</strong>: </td><td>增加農夫產量</td></tr>
+			<tr id="pWaste"><td><strong>不忍浪費</strong>: </td><td>若無其他食物, 工人會以屍首為食</td></tr>
+			<tr id="pStay"><td><strong>歇歇腳</strong>: </td><td>商人逗留時間更長</td></tr>
+		</table>
+	</div>
+	<div id="pastWondersContainer">
+		<h3>奇觀</h3>
+		<table id="pastWonders"><tr><td></td></tr></table>
+	</div>
+	<div id="settings">
+		<h3>設置</h3>
+		<button onmousedown="save('manual')" title="Save your current stats">手動保存</button><br />
+		<button id="toggleAutosave" onmousedown="toggleAutosave()" title="Autosave toggle">禁止自動保存</button><br />
+		<button onmousedown="deleteSave()" title="Delete your saved stats">刪除保存文件</button><br />
+		<br />
+		<button onmousedown="reset()" title="Reset your game">重置遊戲</button><span class="note"><span id="resetNote"><br/>重置</span><span id="resetDeity">就可以得到新神明</span><span id="resetBoth"><br/>或</span><span id="resetWonder">建立新奇觀</span></span><br />
+		<br />
+		<button onmousedown="renameCiv()" title="Rename your civilisation">重命名文明</button><br />
+		<button onmousedown="renameRuler()" title="Rename yourself">重命名自己</button><br />
+		<button id="renameDeity" onmousedown="renameDeity()" title="Rename your deity" disabled>重命名神明</button><br />
+		<br />
+		<button id="toggleCustomIncrements" onmousedown="toggleCustomIncrements()" title="Custom Increment toggle">允許自定義增加量</button><br />
+		<br />
+		<button id="smallerText" onmousedown="text(-1)" title="Smaller Text">小字體</button><br />
+		<button id="largerText" onmousedown="text(1)" title="Larger Text">大字體</button><br />
+		<button id="toggleDelimiters" onmousedown="toggleDelimiters()" title="Toggle Delimiters">禁用分隔符</button><br />
+		<button id="textShadow" onmousedown="textShadow()" title="Toggle Text Shadow">啓用文本陰影</button><br />
+		<button id="toggleNotes" onmousedown="toggleNotes()" title="Toggle Notes">禁止提示</button><br />
+		<button id="toggleWorksafe" onmousedown="toggleWorksafe()" title="Toggle Worksafe Mode">切換背景圖片顯示</button><br />
+		<!--<button id="iconToggle" onmousedown="iconToggle()" title="Toggle Icons">Use Words</button><br />-->
+	</div>
+	<div id="stats">
+		<h3>統計</h3>
+		資源點擊量: <span id="clicks">0</span><br />
+		<br />
+		滿意度: <span id="happiness">滿意</span><br />
+		<br />
+		土地: <span id="totalLand">100</span><br />
+		建築: <span id="totalBuildings">0</span><br />
+		可用地: <span id="freeLand">100</span><br />
+		<br />
+		被殺敵人: <span id="enemiesSlain">0</span><br />
+		屍首: <span id="corpses">0</span><br />
+		<span id="gravesTotal">可用墳墓: <span id="graves">0</span><br /></span>
+		<span id="zombieWorkers">活屍: <span id="zombies">0</span><br /></span>
+		<span id="walkGroup"><br />行屍走肉: <span id="walkStat">0</span>工人/秒<br /></span>
+		<br />
+		神貓: <span id="cats">0</span><br />
+	</div>
+	<div style="clear:both;"><br /></div>
+	<div id="achievements">
+		<h3>功業</h3>
+		<span class="achievement" title="Hamlet"><span class="achUnlocked" id="achHamlet">部落</span></span>
+		<span class="achievement" title="Village"><span class="achUnlocked" id="achVillage">鄉村</span></span>
+		<span class="achievement" title="Small Town"><span class="achUnlocked" id="achSmallTown">小鎮</span></span>
+		<span class="achievement" title="Large Town"><span class="achUnlocked" id="achLargeTown">城鎮</span></span>
+		<span class="achievement" title="Small City"><span class="achUnlocked" id="achSmallCity">小城</span></span>
+		<span class="achievement" title="Large City"><span class="achUnlocked" id="achLargeCity">大城</span></span>
+		<span class="achievement" title="Metropolis"><span class="achUnlocked" id="achMetropolis">都市</span></span>
+		<span class="achievement" title="Small Nation"><span class="achUnlocked" id="achSmallNation">小國</span></span>
+		<span class="achievement" title="Nation"><span class="achUnlocked" id="achNation">國家</span></span>
+		<span class="achievement" title="Large Nation"><span class="achUnlocked" id="achLargeNation">大國</span></span>
+		<span class="achievement" title="Empire"><span class="achUnlocked" id="achEmpire">帝國</span></span>
+		<div style="clear:both;"><br /></div>
+		<span class="achievement" title="Raider"><span class="achUnlocked" id="achRaider">劫掠者</span></span>
+		<span class="achievement" title="Engineer"><span class="achUnlocked" id="achEngineer">工程師</span></span>
+		<span class="achievement" title="Domination"><span class="achUnlocked" id="achDomination">支配者</span></span>
+		<span class="break">&nbsp;</span>
+		<span class="achievement" title="Hated"><span class="achUnlocked" id="achHated">人民最恨</span></span>
+		<span class="achievement" title="Loved"><span class="achUnlocked" id="achLoved">人民最愛</span></span>
+		<span class="break">&nbsp;</span>
+		<span class="achievement" title="Cat!"><span class="achUnlocked" id="achCat">神貓!</span></span>
+		<span class="achievement" title="Glaring"><span class="achUnlocked" id="achGlaring">怒視</span></span>
+		<span class="achievement" title="Clowder"><span class="achUnlocked" id="achClowder">貓群</span></span>
+		<span class="break">&nbsp;</span>
+		<span class="achievement" title="Plagued"><span class="achUnlocked" id="achPlague">災神</span></span>
+		<span class="break">&nbsp;</span>
+		<span class="achievement" title="Ghost Town"><span class="achUnlocked" id="achGhostTown">鬼城</span></span>
+		<div style="clear:both;"><br /></div>
+		<span class="achievement" title="Battle"><span class="achUnlocked" id="achBattle">戰神</span></span>
+		<span class="achievement" title="Fields"><span class="achUnlocked" id="achFields">田神</span></span>
+		<span class="achievement" title="Underworld"><span class="achUnlocked" id="achUnderworld">冥府</span></span>
+		<span class="achievement" title="Cats"><span class="achUnlocked" id="achCats">神貓</span></span>
+		<span class="achievement" title="Full House"><span class="achUnlocked" id="achFullHouse">滿堂紅</span></span>
+		<span class="break">&nbsp;</span>
+		<span class="achievement" title="Wonder"><span class="achUnlocked" id="achWonder">奇觀</span></span>
+		<span class="achievement" title="Seven!"><span class="achUnlocked" id="achSeven">七大!</span></span>
+		<span class="break">&nbsp;</span>
+		<span class="achievement" title="Merchant"><span class="achUnlocked" id="achMerchant">商人</span></span>
+		<span class="achievement" title="Rushed"><span class="achUnlocked" id="achRushed">匆忙</span></span>
+		<span class="break">&nbsp;</span>
+		<span class="achievement" title="Neverclick"><span class="achUnlocked" id="achNeverclick">從不點擊k</span></span>
+	</div>
+</div>
+
+<script type="text/javascript" src="civclicker.js"></script>
+
+</body>
+</html>
